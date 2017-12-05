@@ -1,7 +1,5 @@
 /*
- *  Crowdsale for CoinPoker Tokens.
- *  Raised Ether will be stored safely at the wallet and returned to the ICO in case the funding
- *  goal is not reached, allowing the investors to withdraw their funds.
+ *  Crowdsale for CoinPoker Tokens
  *  Author: Justas Kregždė
  */
  
@@ -74,14 +72,13 @@ contract CoinPokerICO {
     }
     //------------------------
 
-
     // Constructor/initialization
     function CoinPokerICO(address tokenAddr, address walletAddr, address tokenOwnerAddr) {
         tokenReward = token(tokenAddr);
         wallet = walletAddr;
         tokenOwner = tokenOwnerAddr;
     }
-    
+
     // Invest by sending ether to the contract.
     function() payable {
         if (msg.sender != wallet) // Do not trigger investment if the wallet is returning the funds
@@ -95,13 +92,13 @@ contract CoinPokerICO {
         uint amount = msg.value;
         uint price = getPrice();
         uint numTokens = amount.mul(price);
-        
+
         require(numTokens > 0);
         require(!crowdsaleEnded && current() >= start && current() <= end && tokensSold.add(numTokens) <= maxGoal);
-    
+
         wallet.transfer(amount);
         balances[receiver] = balances[receiver].add(amount);
-        
+
         // Calculate how much raised and tokens sold
         amountRaised = amountRaised.add(amount);
         tokensSold = tokensSold.add(numTokens);
@@ -123,7 +120,6 @@ contract CoinPokerICO {
 
     // Checks if the goal or time limit has been reached and ends the campaign
     function checkGoalReached() afterDeadline {
-        require(msg.sender == tokenOwner);
         tokenReward.burn(); // Burn remaining tokens but the reserved ones
         GoalReached(tokenOwner, amountRaised);
         crowdsaleEnded = true;

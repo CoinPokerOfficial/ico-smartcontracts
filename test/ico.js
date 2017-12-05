@@ -83,10 +83,8 @@ contract('ico', accounts => {
              let amount2 = await icoInstance.amount_stages.call(2);
              if (logging) console.log('amount_stages[2]: ' + amount2.toNumber());
              assert.equal(amount2.toNumber(), amount_stages[2], "amount[2] is incorrect");
-             
          });
-         
-         
+        
          it("should buy some CHP during stage-1", async() => {
             await icoInstance.setCurrent(start);
             let approve_result = await tokenInstance.approve(icoInstance.address, maxGoal);
