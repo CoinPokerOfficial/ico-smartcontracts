@@ -44,7 +44,7 @@ contract CoinPokerICO {
     uint constant public start = 1517230800; // Monday, 29 January 2018 13:00:00
     // The end date of the crowdsale
     uint constant public end = 1518440400; // Monday, 12 February 2018 13:00:00
-    // The balances (in ETH) of all investors 
+    // The balances (in ETH) of all investors
     mapping(address => uint) public balances;
     // Indicates if the crowdsale has been ended already
     bool public crowdsaleEnded = false;

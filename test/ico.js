@@ -48,7 +48,7 @@ contract('ico', accounts => {
                 result = await icoInstance.invest(accounts[2], {value: web3.toWei(300, "ether")});
                 throw new Error('Promise was unexpectedly fulfilled. Result: ' + result);
             } catch (error) {
-                let balance = await tokenInstance.balances.call(accounts[2]);
+                let balance = await tokenInstance.balanceOf(accounts[2]);
                 assert.equal(balance.toNumber(), 0);
             }
         });
@@ -92,7 +92,7 @@ contract('ico', accounts => {
             let event = result.logs[0].args;
             assert.equal(event.amount.toNumber(), web3.toWei(1, "ether"));
            
-            let token_balance = await tokenInstance.balances.call(accounts[1]);
+            let token_balance = await tokenInstance.balanceOf(accounts[1]);
             assert.equal(token_balance.toNumber(), 4200e18, "token amount doesn't match during pre-ico");
             if (logging) console.log('token amount bought during stage-1: ' + token_balance.toNumber());
             
@@ -143,12 +143,12 @@ contract('ico', accounts => {
          
        
          it("should fail to buy tokens because of the max goal", async() => {
-            let investorBalance = await tokenInstance.balances.call(accounts[2]);
+            let investorBalance = await tokenInstance.balanceOf(accounts[2]);
             try {
                 let result = await icoInstance.invest(accounts[2], {value: web3.toWei(700000, "ether")});
                 throw new Error('Promise was unexpectedly fulfilled. Result: ' + result);
             } catch (error) {
-                let bal = await tokenInstance.balances.call(accounts[2]);
+                let bal = await tokenInstance.balanceOf(accounts[2]);
                 assert.equal(bal.toNumber(), investorBalance.toNumber());
             }
         });
@@ -158,7 +158,7 @@ contract('ico', accounts => {
                 let result = await icoInstance.invest(accounts[7], {value: web3.toWei(0.0, "ether") });
                 throw new Error('Promise was unexpectedly fulfilled. Result: ' + result);
             } catch (error) {
-                let bal = await tokenInstance.balances.call(accounts[7]);
+                let bal = await tokenInstance.balanceOf(accounts[7]);
                 assert.equal(bal.toNumber(), 0);
             }
         });
@@ -170,7 +170,7 @@ contract('ico', accounts => {
         });
          
          it("should close the crowdsale. goal should be reached. Should burn unsold tokens.", async() => {
-            let bal_before = await tokenInstance.balances(accounts[0]);
+            let bal_before = await tokenInstance.balanceOf(accounts[0]);
             if (logging) console.log('bal_before: ' + bal_before);
             await icoInstance.setCurrent(end+10);
             await tokenInstance.setCurrent(end+10);
@@ -181,12 +181,12 @@ contract('ico', accounts => {
             assert.equal(closed, true, "crowdsale should be already closed");
 
             // check team reserve
-            let bal = await tokenInstance.balances(accounts[0]);
+            let bal = await tokenInstance.balanceOf(accounts[0]);
             if (logging) console.log('team_reserve: ' + bal);
             assert.equal(bal.toNumber(), team_reserve, "incorrect reserved amount");
             
             // check pre-ico reserve
-            let pre_ico_balance = await tokenInstance.balances.call(accounts[8]);
+            let pre_ico_balance = await tokenInstance.balanceOf(accounts[8]);
             if (logging) console.log('pre-ico reserve: ' + pre_ico_balance);
             assert.equal(pre_ico_balance.toNumber(), tokensPreICO, 'incorrect pre-ico balance');
             
@@ -199,7 +199,7 @@ contract('ico', accounts => {
             if (logging) console.log('tournament_amount: ' + tournament_amount);
             let tournaments_burned = tournaments_reserve_max - tournament_amount;
             // for tournaments
-            let tournaments_balance = await tokenInstance.balances.call(accounts[7]);
+            let tournaments_balance = await tokenInstance.balanceOf(accounts[7]);
             assert.equal(tournaments_balance.toNumber(), tournament_amount, 'incorrect tournaments reserve');
             
             // check supply after burn

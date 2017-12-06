@@ -40,7 +40,7 @@ contract CoinPokerToken {
     string constant public name = "Poker Chips";
     string constant public symbol = "CHP";
     uint8 constant public decimals = 18;
-    uint public totalSupply = 500000000e18; // Total supply of 500 Million CoinPoker Tokens
+    uint _totalSupply = 500000000e18; // Total supply of 500 Million CoinPoker Tokens
     uint constant public tokensPreICO = 100000000e18; // 20% for pre-ICO
     uint constant public tokensICO = 275000000e18; // 55% for ICO
     uint constant public teamReserve = 50000000e18; // 10% for team/advisors/exchanges
@@ -66,20 +66,35 @@ contract CoinPokerToken {
     //------------------------
 
     // Array with all balances
-    mapping (address => uint) public balances;
-    mapping (address => mapping (address => uint)) public allowed;
+    mapping (address => uint) balances;
+    mapping (address => mapping (address => uint)) allowed;
 
     // Public event on the blockchain that will notify clients
     event Transfer(address indexed from, address indexed to, uint value);
     event Approval(address indexed _owner, address indexed spender, uint value);
     event Burned(uint amount);
 
+    // What is the balance of a particular account?
+    function balanceOf(address _owner) constant returns (uint balance) {
+        return balances[_owner];
+    }
+
+    // Returns the amount which _spender is still allowed to withdraw from _owner
+    function allowance(address _owner, address _spender) constant returns (uint remaining) {
+        return allowed[_owner][_spender];
+    }
+
+    // Get the total token supply
+    function totalSupply() constant returns (uint totalSupply) {
+        totalSupply = _totalSupply;
+    }
+
     //  Initializes contract with initial supply tokens to the creator of the contract
     function CoinPokerToken(address _ownerAddr, address _preIcoAddr, address _tournamentsAddr) {
         ownerAddr = _ownerAddr;
         preIcoAddr = _preIcoAddr;
         tournamentsAddr = _tournamentsAddr;
-        balances[ownerAddr] = totalSupply; // Give the owner all initial tokens
+        balances[ownerAddr] = _totalSupply; // Give the owner all initial tokens
     }
 
     //  Send some of your tokens to a given address
@@ -130,7 +145,7 @@ contract CoinPokerToken {
         // If tokens have not been burned already and the crowdsale ended
         if (!burned && current() > startTime) {
             // Calculate tournament release amount (tournament_reserve * proportion_how_many_sold)
-            uint total_sold = totalSupply.sub(balances[ownerAddr]);
+            uint total_sold = _totalSupply.sub(balances[ownerAddr]);
             total_sold = total_sold.add(tokensPreICO);
             uint total_ico_amount = tokensPreICO.add(tokensICO);
             uint percentage = percent(total_sold, total_ico_amount, 5);
@@ -147,7 +162,7 @@ contract CoinPokerToken {
             balances[ownerAddr] = teamReserve;
 
             // Burn what's left
-            totalSupply = totalSupply.sub(difference);
+            _totalSupply = _totalSupply.sub(difference);
             burned = true;
             Burned(difference);
         }
