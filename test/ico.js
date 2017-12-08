@@ -45,7 +45,7 @@ contract('ico', accounts => {
          it("should fail to buy tokens, because too early", async() => {
             let result;
             try {
-                result = await icoInstance.invest(accounts[2], {value: web3.toWei(300, "ether")});
+                result = await icoInstance.exchange(accounts[2], {value: web3.toWei(300, "ether")});
                 throw new Error('Promise was unexpectedly fulfilled. Result: ' + result);
             } catch (error) {
                 let balance = await tokenInstance.balanceOf(accounts[2]);
@@ -88,7 +88,7 @@ contract('ico', accounts => {
          it("should buy some CHP during stage-1", async() => {
             await icoInstance.setCurrent(start);
             let approve_result = await tokenInstance.approve(icoInstance.address, maxGoal);
-            let result = await icoInstance.invest(accounts[1], {value: web3.toWei(1, "ether")});
+            let result = await icoInstance.exchange(accounts[1], {value: web3.toWei(1, "ether")});
             let event = result.logs[0].args;
             assert.equal(event.amount.toNumber(), web3.toWei(1, "ether"));
            
@@ -108,7 +108,7 @@ contract('ico', accounts => {
         });
          
          it("should buy CHP amount and go to stage-2", async() => {
-            result = await icoInstance.invest(accounts[2], {value: web3.toWei(24000, "ether")});
+            result = await icoInstance.exchange(accounts[2], {value: web3.toWei(24000, "ether")});
             let event = result.logs[0].args;
             assert.equal(event.amount.toNumber(), web3.toWei(24000, "ether"));
             
@@ -125,7 +125,7 @@ contract('ico', accounts => {
         });
          
          it("should buy CHP amount and go to stage-3", async() => {
-            result = await icoInstance.invest(accounts[2], {value: web3.toWei(21000, "ether")});
+            result = await icoInstance.exchange(accounts[2], {value: web3.toWei(21000, "ether")});
             let event = result.logs[0].args;
             assert.equal(event.amount.toNumber(), web3.toWei(21000, "ether"));
             
@@ -143,19 +143,19 @@ contract('ico', accounts => {
          
        
          it("should fail to buy tokens because of the max goal", async() => {
-            let investorBalance = await tokenInstance.balanceOf(accounts[2]);
+            let exchangeorBalance = await tokenInstance.balanceOf(accounts[2]);
             try {
-                let result = await icoInstance.invest(accounts[2], {value: web3.toWei(700000, "ether")});
+                let result = await icoInstance.exchange(accounts[2], {value: web3.toWei(700000, "ether")});
                 throw new Error('Promise was unexpectedly fulfilled. Result: ' + result);
             } catch (error) {
                 let bal = await tokenInstance.balanceOf(accounts[2]);
-                assert.equal(bal.toNumber(), investorBalance.toNumber());
+                assert.equal(bal.toNumber(), exchangeorBalance.toNumber());
             }
         });
          
          it("should fail to buy tokens with too low msg.value", async() => {
             try {
-                let result = await icoInstance.invest(accounts[7], {value: web3.toWei(0.0, "ether") });
+                let result = await icoInstance.exchange(accounts[7], {value: web3.toWei(0.0, "ether") });
                 throw new Error('Promise was unexpectedly fulfilled. Result: ' + result);
             } catch (error) {
                 let bal = await tokenInstance.balanceOf(accounts[7]);
@@ -213,7 +213,7 @@ contract('ico', accounts => {
             assert.equal(web3.eth.getBalance(icoInstance.address).toNumber(), web3.toWei(20000, "ether"));
         });
          
-         it("should withdraw the invested amount", async() => {
+         it("should withdraw the exchangeed amount", async() => {
             let balanace_before = await icoInstance.balances.call(accounts[1]);
             if (logging) console.log('balance_before: ' + balanace_before);
             let result = await icoInstance.safeWithdrawal({from: accounts[1]});

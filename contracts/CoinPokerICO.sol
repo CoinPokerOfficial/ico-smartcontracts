@@ -44,7 +44,7 @@ contract CoinPokerICO {
     uint constant public start = 1517230800; // Monday, 29 January 2018 13:00:00
     // The end date of the crowdsale
     uint constant public end = 1518440400; // Monday, 12 February 2018 13:00:00
-    // The balances (in ETH) of all investors
+    // The balances (in ETH) of all token holders
     mapping(address => uint) public balances;
     // Indicates if the crowdsale has been ended already
     bool public crowdsaleEnded = false;
@@ -79,16 +79,16 @@ contract CoinPokerICO {
         tokenOwner = tokenOwnerAddr;
     }
 
-    // Invest by sending ether to the contract.
+    // Exchange CHP by sending ether to the contract.
     function() payable {
-        if (msg.sender != wallet) // Do not trigger investment if the wallet is returning the funds
-            invest(msg.sender);
+        if (msg.sender != wallet) // Do not trigger exchange if the wallet is returning the funds
+            exchange(msg.sender);
     }
     
-    // Make an investment. Only callable if the crowdsale started and hasn't been ended, also the maxGoal wasn't reached yet.
+    // Make an exchanegment. Only callable if the crowdsale started and hasn't been ended, also the maxGoal wasn't reached yet.
     // The current token price is looked up by available amount. Bought tokens is transfered to the receiver.
     // The sent value is directly forwarded to a safe wallet.
-    function invest(address receiver) payable {
+    function exchange(address receiver) payable {
         uint amount = msg.value;
         uint price = getPrice();
         uint numTokens = amount.mul(price);
