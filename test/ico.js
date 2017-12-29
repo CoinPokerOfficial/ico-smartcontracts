@@ -16,7 +16,7 @@ let tournaments_wallet = "0x0cbe666498dd2bb2f85b644b5f882e4136ac9558";
 let tokenInstance, icoInstance;
 let prices = [4200, 3850, 3500];
 let amount_stages = [100000000e18, 175000000e18, 275000000e18];
-let logging = false;
+let logging = true;
 
 contract('ico', accounts => {
          
@@ -84,7 +84,7 @@ contract('ico', accounts => {
              if (logging) console.log('amount_stages[2]: ' + amount2.toNumber());
              assert.equal(amount2.toNumber(), amount_stages[2], "amount[2] is incorrect");
          });
-        
+    
          it("should buy some CHP during stage-1", async() => {
             await icoInstance.setCurrent(start);
             let approve_result = await tokenInstance.approve(icoInstance.address, maxGoal);
@@ -93,7 +93,7 @@ contract('ico', accounts => {
             assert.equal(event.amount.toNumber(), web3.toWei(1, "ether"));
            
             let token_balance = await tokenInstance.balanceOf(accounts[1]);
-            assert.equal(token_balance.toNumber(), 4200e18, "token amount doesn't match during pre-ico");
+            assert.equal(token_balance.toNumber(), prices[0] * 1e18, "token amount doesn't match during pre-ico");
             if (logging) console.log('token amount bought during stage-1: ' + token_balance.toNumber());
             
             let amount_balance = await icoInstance.balances.call(accounts[1]);
@@ -105,6 +105,15 @@ contract('ico', accounts => {
             let amountRaised = await icoInstance.amountRaised.call();
             if (logging) console.log('amountRaised during stage-1: ' + amountRaised);
             assert.equal(amountRaised.toNumber(), web3.toWei(1, "ether"), "amount raised incorrect during stage-1");
+        });
+         
+         it("test manual exchange", async() => {
+            await tokenInstance.setCurrent(start);
+            result = await icoInstance.manualExchange(accounts[9], 1000000e18);
+            if (logging) console.log('manual exchange: ' + result);
+        
+            let token_sold = await icoInstance.tokensSold.call();
+            if (logging) console.log('token_sold during after manual exchange: ' + token_sold);
         });
          
          it("should buy CHP amount and go to stage-2", async() => {
@@ -191,21 +200,24 @@ contract('ico', accounts => {
             assert.equal(pre_ico_balance.toNumber(), tokensPreICO, 'incorrect pre-ico balance');
             
             // check tournament reserve
-            let tokens_sold = tokensPreICO + (4200 + 24000 * 4200 + 21000 * 3850) * 1e18;
+            let tokens_sold = tokensPreICO + (prices[0] + 24000 * prices[0] + 21000 * prices[1] + 1000000) * 1e18;
             if (logging) console.log('tokens_sold: ' + tokens_sold);
             let tournament_amount = ((tournaments_reserve_max / 1e18) * ((tokens_sold / 1e18) / (tokensForSaleTotal / 1e18) )) * 1e18;
-            tournament_amount /= 1e21;
-            tournament_amount = Math.round(tournament_amount) * 1e21;
             if (logging) console.log('tournament_amount: ' + tournament_amount);
             let tournaments_burned = tournaments_reserve_max - tournament_amount;
             // for tournaments
             let tournaments_balance = await tokenInstance.balanceOf(accounts[7]);
-            assert.equal(tournaments_balance.toNumber(), tournament_amount, 'incorrect tournaments reserve');
+            tournaments_balance /= 1e19;
+            tournaments_balance = Math.round(tournaments_balance) * 1e19;
+            
+            assert.equal(tournaments_balance, tournament_amount, 'incorrect tournaments reserve');
             
             // check supply after burn
             let supply = await tokenInstance.totalSupply.call();
             if (logging) console.log('supply: ' + supply);
-            assert.equal(supply.toNumber(), team_reserve + tournament_amount + tokens_sold , "incorrect total supply after burning");
+            supply /= 1e19;
+            supply = Math.round(supply) * 1e19;
+            assert.equal(supply, team_reserve + tournament_amount + tokens_sold , "incorrect total supply after burning");
         });
          
          it("should fund the crowdsale contract from the owner's wallet", async() => {

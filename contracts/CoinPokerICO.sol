@@ -84,8 +84,8 @@ contract CoinPokerICO {
         if (msg.sender != wallet) // Do not trigger exchange if the wallet is returning the funds
             exchange(msg.sender);
     }
-    
-    // Make an exchanegment. Only callable if the crowdsale started and hasn't been ended, also the maxGoal wasn't reached yet.
+
+    // Make an exchangement. Only callable if the crowdsale started and hasn't been ended, also the maxGoal wasn't reached yet.
     // The current token price is looked up by available amount. Bought tokens is transfered to the receiver.
     // The sent value is directly forwarded to a safe wallet.
     function exchange(address receiver) payable {
@@ -105,6 +105,15 @@ contract CoinPokerICO {
 
         assert(tokenReward.transferFrom(tokenOwner, receiver, numTokens));
         FundTransfer(receiver, amount, true, amountRaised);
+    }
+
+    // Manual exchange tokens for BTC,LTC,Fiat contributions.
+    // @param receiver who tokens will go to.
+    // @param value an amount of tokens.
+    function manualExchange(address receiver, uint value) {
+        require(msg.sender == tokenOwner);
+        tokensSold = tokensSold.add(value);
+        assert(tokenReward.transferFrom(tokenOwner, receiver, value));
     }
 
     // Looks up the current token price

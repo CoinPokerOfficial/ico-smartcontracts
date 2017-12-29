@@ -136,9 +136,9 @@ contract CoinPokerToken {
     }
 
     //  Called when ICO is closed. Burns the remaining tokens except the tokens reserved:
-    //  for tournaments (released by percentage of total token sale, max 75'000'000)
-    //  for pre-ICO (100'000'000)
-    //  for team/advisors/exchanges (50'000'000).
+    //  - for tournaments (released by percentage of total token sale, max 75'000'000)
+    //  - for pre-ICO (100'000'000)
+    //  - for team/advisors/exchanges (50'000'000).
     //  Anybody may burn the tokens after ICO ended, but only once (in case the owner holds more tokens in the future).
     //  this ensures that the owner will not posses a majority of the tokens.
     function burn() {
@@ -148,8 +148,8 @@ contract CoinPokerToken {
             uint total_sold = _totalSupply.sub(balances[ownerAddr]);
             total_sold = total_sold.add(tokensPreICO);
             uint total_ico_amount = tokensPreICO.add(tokensICO);
-            uint percentage = percent(total_sold, total_ico_amount, 5);
-            uint tournamentsAmount =  tournamentsReserve.mul(percentage).div(100000);
+            uint percentage = percent(total_sold, total_ico_amount, 8);
+            uint tournamentsAmount =  tournamentsReserve.mul(percentage).div(100000000);
 
             // Calculate what's left
             uint totalReserve = teamReserve.add(tokensPreICO);
