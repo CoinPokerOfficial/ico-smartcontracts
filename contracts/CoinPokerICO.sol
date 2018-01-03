@@ -34,8 +34,8 @@ contract CoinPokerICO {
     // The maximum amount of tokens to be sold
     uint constant public maxGoal = 275000000e18; // 275 Milion CoinPoker Tokens
     // There are different prices and amount available in each period
-    uint[3] public prices = [4200, 3850, 3500]; // 1ETH = 4200CHP, 1ETH = 3850CHP, 1ETH = 3500CHP
-    uint[3] public amount_stages = [100000000e18, 175000000e18, 275000000e18]; // the amount stages for different prices
+    uint[3] public prices = [4200, 3850]; // 1ETH = 4200CHP, 1ETH = 3850CHP, 1ETH = 3500CHP
+    uint[3] public amount_stages = [137500000e18, 275000000e18]; // the amount stages for different prices
     // How much has been raised by crowdsale (in ETH)
     uint public amountRaised;
     // The number of tokens already sold
@@ -112,6 +112,7 @@ contract CoinPokerICO {
     // @param value an amount of tokens.
     function manualExchange(address receiver, uint value) {
         require(msg.sender == tokenOwner);
+        require(tokensSold.add(value) <= maxGoal);
         tokensSold = tokensSold.add(value);
         assert(tokenReward.transferFrom(tokenOwner, receiver, value));
     }

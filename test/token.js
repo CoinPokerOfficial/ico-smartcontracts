@@ -13,6 +13,17 @@ let tournaments_reserve_max = 75000000e18; // 25%
 let team_reserve = 50000000e18; // 25%
 let owner = "0x376c9fde9555e9a491c4cd8597ca67bb1bbf397e";
 
+// accounts[0] - owner/team wallet
+// accounts[1] - test wallet
+// accounts[2] - test wallet
+// accounts[3] - test wallet
+// accounts[4] - CoinPoker game wallet (for deposit)
+// accounts[5] - unused
+// accounts[6] - test wallet, after burn to test transfer from reserv
+// accounts[7] - tournament wallet
+// accounts[8] - pre-ico wallet
+// accounts[9] - wallet for manual exchange test
+
 contract('token', accounts => {
          
          before(async() => {
@@ -96,6 +107,15 @@ contract('token', accounts => {
             }
         });
          
+         it("test deposit to CoinPoker game wallet", async() => {
+            let result = await instance.transfer(accounts[4], 5000e18, {from: accounts[1]});
+            let event = result.logs[0].args;
+            assert.equal(event.from, accounts[1]);
+            assert.equal(event.to, accounts[4]);
+            let balance = await instance.balanceOf(accounts[4]);
+            assert.equal(balance.toNumber(),5000e18);
+        });
+        
          it("test token burning: should fail to burn tokens because too early", async() => {
             let result = await instance.burn();
             assert.equal(result.logs.length, 0);//no Burn event
@@ -114,7 +134,7 @@ contract('token', accounts => {
             let balance = await instance.balanceOf(accounts[2]);
             assert.equal(balance.toNumber(),10000e18);
             let bal = await instance.balanceOf(accounts[1]);
-            assert.equal(bal.toNumber(),10000e18);
+            assert.equal(bal.toNumber(),5000e18);
         });
          
          it("test token transfering: should fail to transfer from acc1 because of insufficient funds", async() => {

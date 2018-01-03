@@ -13,15 +13,27 @@ let end = 1518440400; // Monday, 12 February 2018 13:00:00
 let owner = "0x376c9fde9555e9a491c4cd8597ca67bb1bbf397e";
 let pre_ico_wallet = "0xcb88efbfb68a1e6d8a4b0bcf504b6bb6bd623444";
 let tournaments_wallet = "0x0cbe666498dd2bb2f85b644b5f882e4136ac9558";
+let cashier = "0x2258128f5c99124aaeb4d65842dcf1796199df16";
 let tokenInstance, icoInstance;
-let prices = [4200, 3850, 3500];
-let amount_stages = [100000000e18, 175000000e18, 275000000e18];
-let logging = true;
+let prices = [4200, 3850];
+let amount_stages = [137500000e18, 275000000e18];
+let logging = false;
+
+// accounts[0] - owner/team wallet
+// accounts[1] - test wallet
+// accounts[2] - test wallet
+// accounts[3] - test wallet
+// accounts[4] - CoinPoker game wallet (for deposit)
+// accounts[5] - unused
+// accounts[6] - test wallet, after burn to test transfer from reserv
+// accounts[7] - tournament wallet
+// accounts[8] - pre-ico wallet
+// accounts[9] - wallet for manual exchange test
 
 contract('ico', accounts => {
          
          before(async() => {
-                tokenInstance = await token.new(owner, pre_ico_wallet, tournaments_wallet);
+                tokenInstance = await token.new(owner, pre_ico_wallet, tournaments_wallet, cashier);
                 icoInstance = await ico.new(
                                             tokenInstance.address,
                                             owner,
@@ -68,9 +80,9 @@ contract('ico', accounts => {
              if (logging) console.log('price[1]: ' + price1.toNumber());
              assert.equal(price1.toNumber(), prices[1], "price[1] is incorrect");
              
-             let prices2 = await icoInstance.prices.call(2);
-             if (logging) console.log('price[2]: ' + prices2.toNumber());
-             assert.equal(prices2.toNumber(), prices[2], "price[2] is incorrect");
+             //let prices2 = await icoInstance.prices.call(2);
+             //if (logging) console.log('price[2]: ' + prices2.toNumber());
+             //assert.equal(prices2.toNumber(), prices[2], "price[2] is incorrect");
              
              let amount0 = await icoInstance.amount_stages.call(0);
              if (logging) console.log('amount_stages[0]: ' + amount0.toNumber());
@@ -80,9 +92,9 @@ contract('ico', accounts => {
              if (logging) console.log('amount_stages[1]: ' + amount1.toNumber());
              assert.equal(amount1.toNumber(), amount_stages[1], "amount[1] is incorrect");
              
-             let amount2 = await icoInstance.amount_stages.call(2);
-             if (logging) console.log('amount_stages[2]: ' + amount2.toNumber());
-             assert.equal(amount2.toNumber(), amount_stages[2], "amount[2] is incorrect");
+             //let amount2 = await icoInstance.amount_stages.call(2);
+             //if (logging) console.log('amount_stages[2]: ' + amount2.toNumber());
+             //assert.equal(amount2.toNumber(), amount_stages[2], "amount[2] is incorrect");
          });
     
          it("should buy some CHP during stage-1", async() => {
@@ -117,9 +129,9 @@ contract('ico', accounts => {
         });
          
          it("should buy CHP amount and go to stage-2", async() => {
-            result = await icoInstance.exchange(accounts[2], {value: web3.toWei(24000, "ether")});
+            result = await icoInstance.exchange(accounts[2], {value: web3.toWei(42000, "ether")});
             let event = result.logs[0].args;
-            assert.equal(event.amount.toNumber(), web3.toWei(24000, "ether"));
+            assert.equal(event.amount.toNumber(), web3.toWei(42000, "ether"));
             
             let token_sold = await icoInstance.tokensSold.call();
             if (logging) console.log('token_sold: ' + token_sold);
@@ -130,9 +142,9 @@ contract('ico', accounts => {
             
             let amountRaised = await icoInstance.amountRaised.call();
             if (logging) console.log('amountRaised: ' + amountRaised);
-            assert.equal(amountRaised.toNumber(), web3.toWei(24001, "ether"), "amount raised incorrect during stage-1");
+            assert.equal(amountRaised.toNumber(), web3.toWei(42001, "ether"), "amount raised incorrect during stage-1");
         });
-         
+         /*
          it("should buy CHP amount and go to stage-3", async() => {
             result = await icoInstance.exchange(accounts[2], {value: web3.toWei(21000, "ether")});
             let event = result.logs[0].args;
@@ -149,7 +161,7 @@ contract('ico', accounts => {
             if (logging) console.log('amountRaised: ' + amountRaised);
             assert.equal(amountRaised.toNumber(), web3.toWei(45001, "ether"), "amount raised incorrect during stage-2");
         });
-         
+         */
        
          it("should fail to buy tokens because of the max goal", async() => {
             let exchangeorBalance = await tokenInstance.balanceOf(accounts[2]);
@@ -164,10 +176,10 @@ contract('ico', accounts => {
          
          it("should fail to buy tokens with too low msg.value", async() => {
             try {
-                let result = await icoInstance.exchange(accounts[7], {value: web3.toWei(0.0, "ether") });
+                let result = await icoInstance.exchange(accounts[3], {value: web3.toWei(0.0, "ether") });
                 throw new Error('Promise was unexpectedly fulfilled. Result: ' + result);
             } catch (error) {
-                let bal = await tokenInstance.balanceOf(accounts[7]);
+                let bal = await tokenInstance.balanceOf(accounts[3]);
                 assert.equal(bal.toNumber(), 0);
             }
         });
@@ -200,9 +212,9 @@ contract('ico', accounts => {
             assert.equal(pre_ico_balance.toNumber(), tokensPreICO, 'incorrect pre-ico balance');
             
             // check tournament reserve
-            let tokens_sold = tokensPreICO + (prices[0] + 24000 * prices[0] + 21000 * prices[1] + 1000000) * 1e18;
+            let tokens_sold = tokensPreICO + (prices[0] + 42000 * prices[0] + 1000000) * 1e18;
             if (logging) console.log('tokens_sold: ' + tokens_sold);
-            let tournament_amount = ((tournaments_reserve_max / 1e18) * ((tokens_sold / 1e18) / (tokensForSaleTotal / 1e18) )) * 1e18;
+            let tournament_amount = ((tournaments_reserve_max / 1e19) * ((tokens_sold / 1e19) / (tokensForSaleTotal / 1e19) )) * 1e19;
             if (logging) console.log('tournament_amount: ' + tournament_amount);
             let tournaments_burned = tournaments_reserve_max - tournament_amount;
             // for tournaments
@@ -217,7 +229,8 @@ contract('ico', accounts => {
             if (logging) console.log('supply: ' + supply);
             supply /= 1e19;
             supply = Math.round(supply) * 1e19;
-            assert.equal(supply, team_reserve + tournament_amount + tokens_sold , "incorrect total supply after burning");
+            let supply_counted = ((team_reserve / 1e19) + (tournament_amount / 1e19) + (tokens_sold / 1e19)) * 1e19;
+            assert.equal(supply, supply_counted, "incorrect total supply after burning");
         });
          
          it("should fund the crowdsale contract from the owner's wallet", async() => {
@@ -225,7 +238,7 @@ contract('ico', accounts => {
             assert.equal(web3.eth.getBalance(icoInstance.address).toNumber(), web3.toWei(20000, "ether"));
         });
          
-         it("should withdraw the exchangeed amount", async() => {
+         it("should withdraw the exchanged amount", async() => {
             let balanace_before = await icoInstance.balances.call(accounts[1]);
             if (logging) console.log('balance_before: ' + balanace_before);
             let result = await icoInstance.safeWithdrawal({from: accounts[1]});

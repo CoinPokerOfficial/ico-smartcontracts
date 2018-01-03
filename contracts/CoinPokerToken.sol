@@ -49,6 +49,7 @@ contract CoinPokerToken {
     address public ownerAddr;
     address public preIcoAddr; // pre-ICO token holder
     address public tournamentsAddr; // tokens for tournaments
+    address public cashierAddr; // CoinPoker main cashier/game wallet
     bool burned;
 
     // ---- FOR TEST ONLY ----
@@ -85,21 +86,23 @@ contract CoinPokerToken {
     }
 
     // Get the total token supply
-    function totalSupply() constant returns (uint totalSupply) {
-        totalSupply = _totalSupply;
+    function totalSupply() constant returns (uint) {
+        return _totalSupply;
     }
 
     //  Initializes contract with initial supply tokens to the creator of the contract
-    function CoinPokerToken(address _ownerAddr, address _preIcoAddr, address _tournamentsAddr) {
+    function CoinPokerToken(address _ownerAddr, address _preIcoAddr, address _tournamentsAddr, address _cashierAddr) {
         ownerAddr = _ownerAddr;
         preIcoAddr = _preIcoAddr;
         tournamentsAddr = _tournamentsAddr;
+        cashierAddr = _cashierAddr;
         balances[ownerAddr] = _totalSupply; // Give the owner all initial tokens
     }
 
     //  Send some of your tokens to a given address
     function transfer(address _to, uint _value) returns(bool) {
-        require(current() >= startTime); // Check if the crowdsale is already over
+        if (current() < startTime)  // Check if the crowdsale is already over
+            require(_to == cashierAddr); // allow only to transfer CHP (make a deposit) to game/cashier wallet
         balances[msg.sender] = balances[msg.sender].sub(_value); // Subtract from the sender
         balances[_to] = balances[_to].add(_value); // Add the same to the recipient
         Transfer(msg.sender, _to, _value); // Notify anyone listening that this transfer took place
@@ -110,7 +113,7 @@ contract CoinPokerToken {
     //  This is only allowed if the token holder approved.
     function transferFrom(address _from, address _to, uint _value) returns(bool) {
         if (current() < startTime)  // Check if the crowdsale is already over
-            require(_from == ownerAddr);
+            require(_from == ownerAddr || _to == cashierAddr);
         var _allowed = allowed[_from][msg.sender];
         balances[_from] = balances[_from].sub(_value); // Subtract from the sender
         balances[_to] = balances[_to].add(_value); // Add the same to the recipient
