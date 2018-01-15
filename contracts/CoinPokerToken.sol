@@ -45,7 +45,7 @@ contract CoinPokerToken {
     uint constant public tokensICO = 275000000e18; // 55% for ICO
     uint constant public teamReserve = 50000000e18; // 10% for team/advisors/exchanges
     uint constant public tournamentsReserve = 75000000e18; // 15% for tournaments, released by percentage of total tokens sale
-    uint public startTime = 1518440400; // Time after ICO, when tokens may be transferred. Monday, 12 February 2018 13:00:00
+    uint public startTime = 1516960800; // Time after ICO, when tokens may be transferred. Friday, 26 January 2018 10:00:00 GMT
     address public ownerAddr;
     address public preIcoAddr; // pre-ICO token holder
     address public tournamentsAddr; // tokens for tournaments
@@ -152,7 +152,7 @@ contract CoinPokerToken {
             total_sold = total_sold.add(tokensPreICO);
             uint total_ico_amount = tokensPreICO.add(tokensICO);
             uint percentage = percent(total_sold, total_ico_amount, 8);
-            uint tournamentsAmount =  tournamentsReserve.mul(percentage).div(100000000);
+            uint tournamentsAmount = tournamentsReserve.mul(percentage).div(100000000);
 
             // Calculate what's left
             uint totalReserve = teamReserve.add(tokensPreICO);
@@ -160,8 +160,8 @@ contract CoinPokerToken {
             uint difference = balances[ownerAddr].sub(totalReserve);
 
             // Distribute tokens
-            balances[preIcoAddr] = tokensPreICO;
-            balances[tournamentsAddr] = tournamentsAmount;
+            balances[preIcoAddr] = balances[preIcoAddr].add(tokensPreICO);
+            balances[tournamentsAddr] = balances[tournamentsAddr].add(tournamentsAmount);
             balances[ownerAddr] = teamReserve;
 
             // Burn what's left

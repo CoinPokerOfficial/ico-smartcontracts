@@ -34,16 +34,16 @@ contract CoinPokerICO {
     // The maximum amount of tokens to be sold
     uint constant public maxGoal = 275000000e18; // 275 Milion CoinPoker Tokens
     // There are different prices and amount available in each period
-    uint[3] public prices = [4200, 3850]; // 1ETH = 4200CHP, 1ETH = 3850CHP, 1ETH = 3500CHP
-    uint[3] public amount_stages = [137500000e18, 275000000e18]; // the amount stages for different prices
+    uint[2] public prices = [4200, 3500]; // 1ETH = 4200CHP, 1ETH = 3500CHP
+    uint[2] public amount_stages = [137500000e18, 275000000e18]; // the amount stages for different prices
     // How much has been raised by crowdsale (in ETH)
     uint public amountRaised;
     // The number of tokens already sold
     uint public tokensSold = 0;
     // The start date of the crowdsale
-    uint constant public start = 1517230800; // Monday, 29 January 2018 13:00:00
+    uint constant public start = 1516356000; // Friday, 19 January 2018 10:00:00 GMT
     // The end date of the crowdsale
-    uint constant public end = 1518440400; // Monday, 12 February 2018 13:00:00
+    uint constant public end = 1516960800; // Friday, 26 January 2018 10:00:00 GMT
     // The balances (in ETH) of all token holders
     mapping(address => uint) public balances;
     // Indicates if the crowdsale has been ended already
@@ -55,7 +55,7 @@ contract CoinPokerICO {
     // The wallet on which the funds will be stored
     address wallet;
     // Notifying transfers and the success of the crowdsale
-    event GoalReached(address _tokenOwner, uint _amountRaised);
+    event Finalize(address _tokenOwner, uint _amountRaised);
     event FundTransfer(address backer, uint amount, bool isContribution, uint _amountRaised);
 
     // ---- FOR TEST ONLY ----
@@ -129,9 +129,10 @@ contract CoinPokerICO {
     modifier afterDeadline() { if (current() >= end) _; }
 
     // Checks if the goal or time limit has been reached and ends the campaign
-    function checkGoalReached() afterDeadline {
+    function finalize() afterDeadline {
+        require(!crowdsaleEnded);
         tokenReward.burn(); // Burn remaining tokens but the reserved ones
-        GoalReached(tokenOwner, amountRaised);
+        Finalize(tokenOwner, amountRaised);
         crowdsaleEnded = true;
     }
 

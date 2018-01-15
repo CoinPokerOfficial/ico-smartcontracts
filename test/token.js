@@ -4,7 +4,7 @@ let token = artifacts.require("./CoinPokerToken.sol");
 let instance;
 let totalSupply = 500000000e18;
 let init_time = 1508594400;
-let start = 1518440400; // Time after ICO, when tokens may be transferred. Monday, 12 February 2018 13:00:00
+let start = 1516960800; // Time after ICO, when tokens may be transferred. Friday, 26 January 2018 10:00:00 GMT
 let tokensForSaleTotal = 375000000e18; // 75%
 let tokensPreICO = 100000000e18; // 20%
 let tokensICO = 275000000e18; //55%

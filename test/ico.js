@@ -3,19 +3,19 @@ let utils = require('./utils.js')
 let ico = artifacts.require("./CoinPokerICO.sol");
 let token = artifacts.require("./CoinPokerToken.sol");
 
-let maxGoal = 275000000e18; // 350 Milion CoinPoker Tokens for ICO
+let maxGoal = 275000000e18; // 275 Milion CoinPoker Tokens for ICO
 let tokensForSaleTotal = 375000000e18; // 75% of total for sale
-let team_reserve = 50000000e18; // 25% of total for team
+let team_reserve = 50000000e18; // 10% of total for team
 let tokensPreICO = 100000000e18; // 20% of total for pre-ico
 let tournaments_reserve_max = 75000000e18; // 25% of total for tournaments reserve
-let start = 1517230800; // Monday, 29 January 2018 13:00:00
-let end = 1518440400; // Monday, 12 February 2018 13:00:00
+let start = 1516356000; // Friday, 19 January 2018 10:00:00 GMT
+let end = 1516960800; // Friday, 26 January 2018 10:00:00 GMT
 let owner = "0x376c9fde9555e9a491c4cd8597ca67bb1bbf397e";
 let pre_ico_wallet = "0xcb88efbfb68a1e6d8a4b0bcf504b6bb6bd623444";
 let tournaments_wallet = "0x0cbe666498dd2bb2f85b644b5f882e4136ac9558";
 let cashier = "0x2258128f5c99124aaeb4d65842dcf1796199df16";
 let tokenInstance, icoInstance;
-let prices = [4200, 3850];
+let prices = [4200, 3500];
 let amount_stages = [137500000e18, 275000000e18];
 let logging = false;
 
@@ -80,10 +80,6 @@ contract('ico', accounts => {
              if (logging) console.log('price[1]: ' + price1.toNumber());
              assert.equal(price1.toNumber(), prices[1], "price[1] is incorrect");
              
-             //let prices2 = await icoInstance.prices.call(2);
-             //if (logging) console.log('price[2]: ' + prices2.toNumber());
-             //assert.equal(prices2.toNumber(), prices[2], "price[2] is incorrect");
-             
              let amount0 = await icoInstance.amount_stages.call(0);
              if (logging) console.log('amount_stages[0]: ' + amount0.toNumber());
              assert.equal(amount0.toNumber(), amount_stages[0], "amount[0] is incorrect");
@@ -91,10 +87,6 @@ contract('ico', accounts => {
              let amount1 = await icoInstance.amount_stages.call(1);
              if (logging) console.log('amount_stages[1]: ' + amount1.toNumber());
              assert.equal(amount1.toNumber(), amount_stages[1], "amount[1] is incorrect");
-             
-             //let amount2 = await icoInstance.amount_stages.call(2);
-             //if (logging) console.log('amount_stages[2]: ' + amount2.toNumber());
-             //assert.equal(amount2.toNumber(), amount_stages[2], "amount[2] is incorrect");
          });
     
          it("should buy some CHP during stage-1", async() => {
@@ -185,7 +177,7 @@ contract('ico', accounts => {
         });
          
          it("should fail to close crowdsale because too early", async() => {
-            await icoInstance.checkGoalReached({from: owner});
+            await icoInstance.finalize({from: owner});
             let reached = await icoInstance.crowdsaleEnded.call();
             assert.equal(reached, false, "crowdsale end shouldn't be reached");
         });
@@ -195,7 +187,7 @@ contract('ico', accounts => {
             if (logging) console.log('bal_before: ' + bal_before);
             await icoInstance.setCurrent(end+10);
             await tokenInstance.setCurrent(end+10);
-            let result = await icoInstance.checkGoalReached({from: owner});
+            let result = await icoInstance.finalize({from: owner});
             console.log('result log: ' + JSON.stringify(result.logs[0]));
             
             let closed = await icoInstance.crowdsaleEnded.call();
